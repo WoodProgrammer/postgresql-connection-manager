@@ -41,7 +41,7 @@ func (c *CgroupHandler) CreateCgroupV2(res cgroupsv2.Resources, cgroupName strin
 func (c *CgroupHandler) MovePIDToCgroupHandler(name string, pid string) error {
 	content := []byte(pid)
 
-	err := os.WriteFile(CGROUP_PATH+name+"/cgroup.procs", content, 0644)
+	err := os.WriteFile(CGROUP_PATH+name+"/cgroup.procs", content, FILE_PERMISSION)
 	if err != nil {
 		log.Err(err).Msg("Error while assign the PID to the relevant cgroups MovePIDToCgroupHandler")
 		return err
