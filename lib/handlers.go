@@ -1,10 +1,10 @@
 package lib
 
 import (
-	"fmt"
 	"os"
 
 	cgroupsv2 "github.com/containerd/cgroups/v3/cgroup2"
+	"github.com/rs/zerolog/log"
 )
 
 type CgroupInterface interface {
@@ -12,6 +12,7 @@ type CgroupInterface interface {
 	CreateCgroupV2(res cgroupsv2.Resources, cgroupPath string, cgroupName string) error
 	MovePIDToCgroupHandler(name string, pid string) error
 }
+
 type CgroupHandler struct {
 }
 
@@ -32,13 +33,10 @@ func (c *CgroupHandler) CreateCgroupV2(res cgroupsv2.Resources, cgroupPath strin
 	}
 	cgroupManager, err := cgroupsv2.NewManager(cgroupPath, "/"+cgroupName, &res)
 	if err != nil {
-		fmt.Printf("Error creating cgroup: %v\n", err)
+		log.Err(err).Msg("Error creating cgroup: in cGroupHandler CreateCgroupV2")
 		return err
-	} else {
-		fmt.Println("The group created successfully")
 	}
-	fmt.Println(cgroupManager)
-
+	log.Info().Msgf("The group created successfully %s object is %s", cgroupName, cgroupManager)
 	return nil
 }
 
@@ -48,7 +46,8 @@ func (c *CgroupHandler) MovePIDToCgroupHandler(name string, pid string) error {
 
 	err := os.WriteFile(cgroupPath+name+"/cgroup.procs", content, 0644)
 	if err != nil {
-		panic(err)
+		log.Err(err).Msg("Error while assign the PID to the relevant cgroups MovePIDToCgroupHandler")
+		return err
 	}
 	return nil
 

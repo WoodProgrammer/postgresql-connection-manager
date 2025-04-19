@@ -1,26 +1,9 @@
 package controller
 
 import (
-	lib "github.com/WoodProgrammer/postgresql-connection-manager/lib"
 	"github.com/gin-gonic/gin"
+	"github.com/rs/zerolog/log"
 )
-
-type Controller struct {
-	CGroupClient lib.CgroupInterface
-}
-
-type CGroupV2CreationRequest struct {
-	Name      string `json:"name"`
-	PID       string `json:"pid"`
-	CpuCycle  int64  `json:"cycle"`
-	CpuPeriod int64  `json:"period"`
-	Memory    int64  `json:"memory"`
-}
-
-type CGroupV2MoveRequest struct {
-	PID  string `json:"pid"`
-	Name string `json:"name"`
-}
 
 func (c *Controller) CreateCgroup(ctx *gin.Context) {
 	var cgroup CGroupV2CreationRequest
@@ -31,7 +14,9 @@ func (c *Controller) CreateCgroup(ctx *gin.Context) {
 	res := c.CGroupClient.HandleCgroupResources(cgroup.CpuCycle, cgroup.Memory, uint64(cgroup.CpuPeriod))
 	err := c.CGroupClient.CreateCgroupV2(res, "", cgroup.Name)
 	if err != nil {
+		log.Err(err).Msgf("Error while creating cgroups controller.CreateCgroup()")
 		ctx.JSON(500, err)
+		return
 	}
 	ctx.JSON(200, &cgroup)
 }
@@ -44,7 +29,9 @@ func (c *Controller) MovePIDToCgroup(ctx *gin.Context) {
 	}
 	err := c.CGroupClient.MovePIDToCgroupHandler(cgroup.Name, cgroup.PID)
 	if err != nil {
+		log.Err(err).Msgf("Error while moving PID to %s controller.MovePIDToCgroup()", cgroup.PID)
 		ctx.JSON(500, err)
+		return
 	}
 	ctx.JSON(200, &cgroup)
 }
