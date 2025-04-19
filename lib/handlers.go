@@ -9,7 +9,7 @@ import (
 
 type CgroupInterface interface {
 	HandleCgroupResources(cpuQuota, memoryInByes int64, period uint64) cgroupsv2.Resources
-	CreateCgroupV2(res cgroupsv2.Resources, cgroupPath string, cgroupName string) error
+	CreateCgroupV2(res cgroupsv2.Resources, cgroupName string) error
 	MovePIDToCgroupHandler(name string, pid string) error
 }
 
@@ -27,11 +27,9 @@ func (c *CgroupHandler) HandleCgroupResources(cpuQuota, memoryInByes int64, peri
 
 }
 
-func (c *CgroupHandler) CreateCgroupV2(res cgroupsv2.Resources, cgroupPath string, cgroupName string) error {
-	if len(cgroupPath) == 0 {
-		cgroupPath = "/sys/fs/cgroup/"
-	}
-	cgroupManager, err := cgroupsv2.NewManager(cgroupPath, "/"+cgroupName, &res)
+func (c *CgroupHandler) CreateCgroupV2(res cgroupsv2.Resources, cgroupName string) error {
+
+	cgroupManager, err := cgroupsv2.NewManager(CGROUP_PATH, "/"+cgroupName, &res)
 	if err != nil {
 		log.Err(err).Msg("Error creating cgroup: in cGroupHandler CreateCgroupV2")
 		return err
@@ -41,10 +39,9 @@ func (c *CgroupHandler) CreateCgroupV2(res cgroupsv2.Resources, cgroupPath strin
 }
 
 func (c *CgroupHandler) MovePIDToCgroupHandler(name string, pid string) error {
-	cgroupPath := "/sys/fs/cgroup/"
 	content := []byte(pid)
 
-	err := os.WriteFile(cgroupPath+name+"/cgroup.procs", content, 0644)
+	err := os.WriteFile(CGROUP_PATH+name+"/cgroup.procs", content, 0644)
 	if err != nil {
 		log.Err(err).Msg("Error while assign the PID to the relevant cgroups MovePIDToCgroupHandler")
 		return err
