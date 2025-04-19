@@ -5,8 +5,8 @@ import (
 	"github.com/gin-gonic/gin"
 )
 
-func NewCgroupHandlerClient() lib.CgroupInterface {
-	return &lib.CgroupHandler{}
+type Controller struct {
+	CGroupClient lib.CgroupInterface
 }
 
 type CGroupV2CreationRequest struct {
@@ -14,7 +14,7 @@ type CGroupV2CreationRequest struct {
 	PID       string `json:"pid"`
 	CpuCycle  int64  `json:"cycle"`
 	CpuPeriod int64  `json:"period"`
-	Memmory   int64  `json:"memory"`
+	Memory    int64  `json:"memory"`
 }
 
 type CGroupV2MoveRequest struct {
@@ -22,31 +22,29 @@ type CGroupV2MoveRequest struct {
 	Name string `json:"name"`
 }
 
-func CreateCgroup(c *gin.Context) {
-	cgroupHandlerClient := NewCgroupHandlerClient()
+func (c *Controller) CreateCgroup(ctx *gin.Context) {
 	var cgroup CGroupV2CreationRequest
 
-	if err := c.BindJSON(&cgroup); err != nil {
+	if err := ctx.BindJSON(&cgroup); err != nil {
 		return
 	}
-	res := cgroupHandlerClient.HandleCgroupResources(cgroup.CpuCycle, cgroup.CpuCycle, uint64(cgroup.Memmory))
-	err := cgroupHandlerClient.CreateCgroupV2(res, "", cgroup.Name)
+	res := c.CGroupClient.HandleCgroupResources(cgroup.CpuCycle, cgroup.Memory, uint64(cgroup.CpuPeriod))
+	err := c.CGroupClient.CreateCgroupV2(res, "", cgroup.Name)
 	if err != nil {
-		c.JSON(500, err)
+		ctx.JSON(500, err)
 	}
-	c.JSON(200, &cgroup)
+	ctx.JSON(200, &cgroup)
 }
 
-func MovePIDToCgroup(c *gin.Context) {
+func (c *Controller) MovePIDToCgroup(ctx *gin.Context) {
 	var cgroup CGroupV2MoveRequest
 
-	if err := c.BindJSON(&cgroup); err != nil {
+	if err := ctx.BindJSON(&cgroup); err != nil {
 		return
 	}
-	cgroupHandlerClient := NewCgroupHandlerClient()
-	err := cgroupHandlerClient.MovePIDToCgroupHandler(cgroup.Name, cgroup.PID)
+	err := c.CGroupClient.MovePIDToCgroupHandler(cgroup.Name, cgroup.PID)
 	if err != nil {
-		c.JSON(500, err)
+		ctx.JSON(500, err)
 	}
-	c.JSON(200, &cgroup)
+	ctx.JSON(200, &cgroup)
 }

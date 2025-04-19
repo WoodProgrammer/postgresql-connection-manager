@@ -2,6 +2,7 @@ package main
 
 import (
 	controller "github.com/WoodProgrammer/postgresql-connection-manager/controller"
+	lib "github.com/WoodProgrammer/postgresql-connection-manager/lib"
 
 	"github.com/gin-gonic/gin"
 )
@@ -11,11 +12,23 @@ const (
 	MovePIDToCgroupsPath = "/v1/move-pid-to-cgroups"
 )
 
-func main() {
-	router := gin.Default()
+func NewCgroupHandlerClient() lib.CgroupInterface {
+	return &lib.CgroupHandler{}
+}
 
-	router.POST(CreateCgroupsPath, controller.CreateCgroup)
-	router.POST(MovePIDToCgroupsPath, controller.MovePIDToCgroup)
+func NewControllerClient() *controller.Controller {
+	c := NewCgroupHandlerClient()
+	return &controller.Controller{
+		CGroupClient: c,
+	}
+}
+
+func main() {
+
+	router := gin.Default()
+	controllerHandler := NewControllerClient()
+	router.POST(CreateCgroupsPath, controllerHandler.CreateCgroup)
+	router.POST(MovePIDToCgroupsPath, controllerHandler.MovePIDToCgroup)
 
 	router.Run("localhost:8080")
 }

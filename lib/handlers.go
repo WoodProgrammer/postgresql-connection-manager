@@ -46,7 +46,7 @@ func (c *CgroupHandler) MovePIDToCgroupHandler(name string, pid string) error {
 	cgroupPath := "/sys/fs/cgroup/"
 	content := []byte(pid)
 
-	err := os.WriteFile(cgroupPath+"/"+name, content, 0644)
+	err := os.WriteFile(cgroupPath+name+"/cgroup.procs", content, 0644)
 	if err != nil {
 		panic(err)
 	}
