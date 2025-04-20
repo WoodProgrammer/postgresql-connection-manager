@@ -2,7 +2,6 @@ package lib
 
 import (
 	"database/sql"
-	"encoding/json"
 	"fmt"
 	"os"
 
@@ -15,7 +14,7 @@ type CgroupInterface interface {
 	HandleCgroupResources(cpuQuota, memoryInByes int64, period uint64) cgroupsv2.Resources
 	CreateCgroupV2(res cgroupsv2.Resources, cgroupName string) error
 	MovePIDToCgroupHandler(name string, pid string) error
-	GatherPostgresqlConnectionDetails(host, port, password, user, sslmode, query string) ([]byte, error)
+	GatherPostgresqlConnectionDetails(host, port, password, user, sslmode, query string) ([]map[string]interface{}, error)
 }
 
 type CgroupHandler struct {
@@ -54,7 +53,7 @@ func (c *CgroupHandler) MovePIDToCgroupHandler(name string, pid string) error {
 	return nil
 }
 
-func (c *CgroupHandler) GatherPostgresqlConnectionDetails(host, port, password, user, sslmode, query string) ([]byte, error) {
+func (c *CgroupHandler) GatherPostgresqlConnectionDetails(host, port, password, user, sslmode, query string) ([]map[string]interface{}, error) {
 
 	connStr := fmt.Sprintf("host=%s port=%s user=%s password=%s sslmode=%s", host, port, user, password, sslmode)
 	db, err := sql.Open("postgres", connStr)
@@ -85,14 +84,13 @@ func (c *CgroupHandler) GatherPostgresqlConnectionDetails(host, port, password, 
 	var results []map[string]interface{}
 
 	for rows.Next() {
-		// Allocate slice for row values
+
 		values := make([]interface{}, len(columns))
 		valuePtrs := make([]interface{}, len(columns))
 		for i := range columns {
 			valuePtrs[i] = &values[i]
 		}
 
-		// Scan the row
 		if err := rows.Scan(valuePtrs...); err != nil {
 			log.Err(err).Msg("Scan error:")
 		}
@@ -110,12 +108,6 @@ func (c *CgroupHandler) GatherPostgresqlConnectionDetails(host, port, password, 
 		results = append(results, rowMap)
 	}
 
-	jsonBytes, err := json.MarshalIndent(results, "", "  ")
-	if err != nil {
-		log.Err(err).Msg("JSON marshal error:")
-		return nil, err
-	}
-
-	return jsonBytes, nil
+	return results, nil
 
 }
