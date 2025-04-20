@@ -10,6 +10,7 @@ import (
 const (
 	CreateCgroupsPath    = "/v1/create-cgroups"
 	MovePIDToCgroupsPath = "/v1/move-pid-to-cgroups"
+	GetPIDOfQueries      = "/v1/get-pid-of-queries"
 )
 
 func NewCgroupHandlerClient() lib.CgroupInterface {
@@ -29,6 +30,7 @@ func main() {
 	controllerHandler := NewControllerClient()
 	router.POST(CreateCgroupsPath, controllerHandler.CreateCgroup)
 	router.POST(MovePIDToCgroupsPath, controllerHandler.MovePIDToCgroup)
+	router.GET(GetPIDOfQueries, controllerHandler.GetPIDOfQueries)
 
 	router.Run("localhost:8080")
 }

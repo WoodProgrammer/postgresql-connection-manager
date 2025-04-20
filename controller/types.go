@@ -18,3 +18,11 @@ type CGroupV2MoveRequest struct {
 	PID  string `json:"pid"`
 	Name string `json:"name"`
 }
+
+type GetPIDOfQueriesRequest struct {
+	Query    string `json:"query"`
+	Port     string `json:"port"`
+	Password string `json:"password"`
+	UserName string `json:"username"`
+	SSLMode  string `json:"sslmode"`
+}

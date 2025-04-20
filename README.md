@@ -23,5 +23,23 @@ curl http://localhost:8080/v1/move-pid-to-cgroups \
     --data '{"pid": "12416","name": "pg-exporter-cgroup-second"}'
 
 
+
+	Query    string `json:"query"`
+	Port     string `json:"port"`
+	Password string `json:"password"`
+	UserName string `json:"username"`
+	SSLMode  string `json:"sslmode"`
+
+
+curl http://localhost:8080/v1/get-pid-of-queries \
+    --include \
+    --header "Content-Type: application/json" \
+    --request "GET" \
+    --data '{"query": "SELECT pid, usename, application_name, state FROM pg_stat_activity;","port": "5432", "password":"CVVVVV", "username": "postgres", "sslmode": "disabled"}'
+
+/v1/get-pid-of-queries
+
+
+
 [45792.694947] oom-kill:constraint=CONSTRAINT_MEMCG,nodemask=(null),cpuset=/,mems_allowed=0,oom_memcg=/pg-exporter-cgroup,task_memcg=/pg-exporter-cgroup,task=postgres,pid=11700,uid=109
 [45792.694961] Memory cgroup out of memory: Killed process 11700 (postgres) total-vm:224872kB, anon-rss:3324kB, file-rss:9176kB, shmem-rss:3472kB, UID:109 pgtables:164kB oom_score_adj:0
