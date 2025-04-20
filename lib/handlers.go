@@ -84,14 +84,13 @@ func (c *CgroupHandler) GatherPostgresqlConnectionDetails(host, port, password, 
 	var results []map[string]interface{}
 
 	for rows.Next() {
-		// Allocate slice for row values
+
 		values := make([]interface{}, len(columns))
 		valuePtrs := make([]interface{}, len(columns))
 		for i := range columns {
 			valuePtrs[i] = &values[i]
 		}
 
-		// Scan the row
 		if err := rows.Scan(valuePtrs...); err != nil {
 			log.Err(err).Msg("Scan error:")
 		}
@@ -108,13 +107,6 @@ func (c *CgroupHandler) GatherPostgresqlConnectionDetails(host, port, password, 
 		}
 		results = append(results, rowMap)
 	}
-
-	/*
-		jsonBytes, err := json.MarshalIndent(results, "", "  ")
-		if err != nil {
-			log.Err(err).Msg("JSON marshal error:")
-			return nil, err
-		}*/
 
 	return results, nil
 
