@@ -49,5 +49,5 @@ func (c *Controller) GetPIDOfQueries(ctx *gin.Context) {
 		ctx.JSON(500, err)
 		return
 	}
-	ctx.JSON(200, result)
+	ctx.IndentedJSON(200, string(result))
 }
