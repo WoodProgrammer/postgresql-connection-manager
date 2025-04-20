@@ -35,7 +35,7 @@ curl http://localhost:8080/v1/get-pid-of-queries \
     --include \
     --header "Content-Type: application/json" \
     --request "GET" \
-    --data '{"query": "SELECT pid, usename, application_name, state FROM pg_stat_activity;","port": "5432", "password":"CVVVVV", "username": "postgres", "sslmode": "disabled"}'
+    --data '{"query": "SELECT pid, usename, application_name, state FROM pg_stat_activity;","port": "5432", "password":"mynewpassword", "username": "postgres", "sslmode": "disable"}'
 
 /v1/get-pid-of-queries
 
