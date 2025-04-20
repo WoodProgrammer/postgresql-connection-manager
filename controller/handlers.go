@@ -35,3 +35,19 @@ func (c *Controller) MovePIDToCgroup(ctx *gin.Context) {
 	}
 	ctx.JSON(200, &cgroup)
 }
+
+func (c *Controller) GetPIDOfQueries(ctx *gin.Context) {
+	var request GetPIDOfQueriesRequest
+
+	if err := ctx.BindJSON(&request); err != nil {
+		return
+	}
+
+	result, err := c.CGroupClient.GatherPostgresqlConnectionDetails("localhost", request.Port, request.Password, request.UserName, request.SSLMode, request.Query)
+	if err != nil {
+		log.Err(err).Msgf("Error while fetching query results in postgresql")
+		ctx.JSON(500, err)
+		return
+	}
+	ctx.JSON(200, result)
+}
