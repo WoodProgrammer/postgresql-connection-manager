@@ -22,9 +22,12 @@ This project allows system administrators to detect specific PostgreSQL queries,
 git clone https://github.com/WoodProgrammer/pg-connection-manager.git
 cd pg-connection-manager
 go build -o pg-cgroup-manager
+
+export PG_CONNECTION_HANDLER_PORT=9001
 ./pg-connection-manager
 
 ```
+Please specify the port that you would like to expose.
 
 <hr>
 
