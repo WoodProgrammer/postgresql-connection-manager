@@ -70,7 +70,7 @@ Then you can create a cgroupV2 and move your postgresql process under the Cgroup
 
 <hr></hr>
 
-## 2. Get PIDs of Queries
+## 2. Create CgroupsV2
 
 Creates a new cgroup under the default cgroups v2 hierarchy.
 
