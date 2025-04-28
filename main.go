@@ -14,6 +14,7 @@ import (
 const (
 	CreateCgroupsPath    = "/v1/create-cgroups"
 	DeleteCgroupsPath    = "/v1/delete-cgroups"
+	Metrics              = "/v1/metrics"
 	MovePIDToCgroupsPath = "/v1/move-pid-to-cgroups"
 	GetPIDOfQueries      = "/v1/get-pid-of-queries"
 )
@@ -22,10 +23,16 @@ func NewCgroupHandlerClient() lib.CgroupInterface {
 	return &lib.CgroupHandler{}
 }
 
+func NewMetricClient() lib.MetricInterface {
+	return &lib.MetricHandler{}
+}
+
 func NewControllerClient() *controller.Controller {
 	c := NewCgroupHandlerClient()
+	m := NewMetricClient()
 	return &controller.Controller{
 		CGroupClient: c,
+		MetricClient: m,
 	}
 }
 
@@ -60,6 +67,7 @@ func main() {
 	router.POST(MovePIDToCgroupsPath, AuthMiddleware(), controllerHandler.MovePIDToCgroup)
 	router.DELETE(DeleteCgroupsPath, AuthMiddleware(), controllerHandler.DeleteCgroupsPath)
 	router.GET(GetPIDOfQueries, AuthMiddleware(), controllerHandler.GetPIDOfQueries)
+	router.GET(Metrics, AuthMiddleware(), controllerHandler.GetMetrics)
 
 	router.Run(fmt.Sprintf("localhost:%s", port))
 }

@@ -4,8 +4,16 @@ import lib "github.com/WoodProgrammer/postgresql-connection-manager/lib"
 
 type Controller struct {
 	CGroupClient lib.CgroupInterface
+	MetricClient lib.MetricInterface
+}
+type Metrics struct {
+	CgroupName        string
+	MemoryStatMetrics MemoryStat
 }
 
+type MemoryStat struct {
+	Vmalloc string
+}
 type CGroupV2DeletionRequest struct {
 	Name string `json:"name"`
 }

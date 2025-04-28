@@ -5,6 +5,19 @@ import (
 	"github.com/rs/zerolog/log"
 )
 
+func (c *Controller) GetMetrics(ctx *gin.Context) {
+
+	cgroupName := ctx.Query("cgroupName")
+	metrics, err := c.MetricClient.CollectMetrics(cgroupName)
+
+	if err != nil {
+		log.Err(err).Msgf("Error while fetching metrics controller.GetMetrics()")
+		ctx.JSON(500, err)
+		return
+	}
+
+	ctx.JSON(200, &metrics)
+}
 func (c *Controller) DeleteCgroupsPath(ctx *gin.Context) {
 	var req CGroupV2DeletionRequest
 
