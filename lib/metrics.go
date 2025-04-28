@@ -4,13 +4,17 @@ import (
 	"os"
 	"strconv"
 	"strings"
+
+	"github.com/prometheus/client_golang/prometheus"
+	"github.com/rs/zerolog/log"
 )
 
-type MetricInterface interface {
-	CollectMetrics(cgroupPath string) (*CgroupMetrics, error)
+type CgroupCollector struct {
+	Desc *prometheus.Desc
 }
 
-type MetricHandler struct {
+type MetricInterface interface {
+	Describe(ch chan<- *prometheus.Desc)
 }
 
 type CgroupMetrics struct {
@@ -19,6 +23,10 @@ type CgroupMetrics struct {
 	MemoryCurrent      uint64 `json:"memory_current_bytes"`
 	OOMEvents          uint64 `json:"oom_events"`
 	ProcessesCurrent   uint64 `json:"processes_current"`
+}
+
+func (c *CgroupCollector) Describe(ch chan<- *prometheus.Desc) {
+	ch <- c.Desc
 }
 
 func readUintFromFile(filepath string) (uint64, error) {
@@ -68,33 +76,72 @@ func parseCgroupEvents(filepath string) (oomEvents uint64, err error) {
 	return oomEvents, nil
 }
 
-func (m *MetricHandler) CollectMetrics(cgroupName string) (*CgroupMetrics, error) {
-	fullCgroupPath := CGROUP_PATH + cgroupName
-	cpuUsage, cpuThrottled, err := parseCPUStat(fullCgroupPath + "/cpu.stat")
+func (m *CgroupCollector) Collect(ch chan<- prometheus.Metric) {
+
+	directoryList, err := os.ReadDir(CGROUP_PATH)
 	if err != nil {
-		return nil, err
+		log.Err(err).Msgf("Error while inspecting in cgroup path")
 	}
 
-	memCurrent, err := readUintFromFile(fullCgroupPath + "/memory.current")
-	if err != nil {
-		return nil, err
+	for _, dir := range directoryList {
+		if strings.Contains(dir.Name(), "pg-") {
+			dirName := dir.Name()
+			cpuUsage, cpuThrottled, err := parseCPUStat(CGROUP_PATH + "/" + dirName + "/cpu.stat")
+			if err != nil {
+				log.Err(err).Msgf("There is and error while reading cpu stats")
+			}
+
+			ch <- prometheus.MustNewConstMetric(
+				m.Desc,
+				prometheus.GaugeValue,
+				float64(cpuUsage),
+				"cpu_usage", dirName,
+			)
+
+			ch <- prometheus.MustNewConstMetric(
+				m.Desc,
+				prometheus.GaugeValue,
+				float64(cpuThrottled),
+				"cpu_throttled", dirName,
+			)
+
+			memCurrent, err := readUintFromFile(CGROUP_PATH + "/" + dirName + "/memory.current")
+			if err != nil {
+				log.Err(err).Msgf("There is and error while reading memory.current")
+			}
+			ch <- prometheus.MustNewConstMetric(
+				m.Desc,
+				prometheus.GaugeValue,
+				float64(memCurrent),
+				"mem_current", dirName,
+			)
+
+			oomEvents, err := parseCgroupEvents(CGROUP_PATH + "/" + dirName + "/cgroup.events")
+			if err != nil {
+				log.Err(err).Msgf("There is and error while reading cgroup.events")
+
+			}
+			ch <- prometheus.MustNewConstMetric(
+				m.Desc,
+				prometheus.GaugeValue,
+				float64(oomEvents),
+				"oom_events", dirName,
+			)
+
+			pidsCurrent, err := readUintFromFile(CGROUP_PATH + "/" + dirName + "/pids.current")
+			if err != nil {
+				log.Err(err).Msgf("There is and error while reading pids.current")
+			}
+
+			ch <- prometheus.MustNewConstMetric(
+				m.Desc,
+				prometheus.GaugeValue,
+				float64(pidsCurrent),
+				"pids.current", dirName,
+			)
+		} else {
+			continue
+		}
 	}
 
-	oomEvents, err := parseCgroupEvents(fullCgroupPath + "/cgroup.events")
-	if err != nil {
-		return nil, err
-	}
-
-	pidsCurrent, err := readUintFromFile(fullCgroupPath + "/pids.current")
-	if err != nil {
-		return nil, err
-	}
-
-	return &CgroupMetrics{
-		CPUUsageMicros:     cpuUsage,
-		CPUThrottledMicros: cpuThrottled,
-		MemoryCurrent:      memCurrent,
-		OOMEvents:          oomEvents,
-		ProcessesCurrent:   pidsCurrent,
-	}, nil
 }
