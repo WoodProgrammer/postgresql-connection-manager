@@ -12,6 +12,7 @@ import (
 
 const (
 	CreateCgroupsPath    = "/v1/create-cgroups"
+	DeleteCgroupsPath    = "/v1/delete-cgroups"
 	MovePIDToCgroupsPath = "/v1/move-pid-to-cgroups"
 	GetPIDOfQueries      = "/v1/get-pid-of-queries"
 )
@@ -37,6 +38,7 @@ func main() {
 	controllerHandler := NewControllerClient()
 	router.POST(CreateCgroupsPath, controllerHandler.CreateCgroup)
 	router.POST(MovePIDToCgroupsPath, controllerHandler.MovePIDToCgroup)
+	router.DELETE(DeleteCgroupsPath, controllerHandler.DeleteCgroupsPath)
 	router.GET(GetPIDOfQueries, controllerHandler.GetPIDOfQueries)
 
 	router.Run(fmt.Sprintf("localhost:%s", port))

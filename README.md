@@ -115,7 +115,7 @@ curl http://localhost:8080/v1/move-pid-to-cgroups \
     --include \
     --header "Content-Type: application/json" \
     --request "POST" \
-    --data '{"pid": "12416","name": "pg-exporter-cgroup-second"}'
+    --data '{"pid": "7323","name": "pg-long-running-group"}'
 ```
 
 Then you can basically check the cgroups.procs file of the given cgroup then your postgresql process will runs in given Cgroup.

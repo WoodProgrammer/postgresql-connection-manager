@@ -6,6 +6,10 @@ type Controller struct {
 	CGroupClient lib.CgroupInterface
 }
 
+type CGroupV2DeletionRequest struct {
+	Name string `json:"name"`
+}
+
 type CGroupV2CreationRequest struct {
 	Name      string `json:"name"`
 	PID       string `json:"pid"`
