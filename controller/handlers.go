@@ -5,6 +5,23 @@ import (
 	"github.com/rs/zerolog/log"
 )
 
+func (c *Controller) DeleteCgroupsPath(ctx *gin.Context) {
+	var req CGroupV2DeletionRequest
+
+	if err := ctx.BindJSON(&req); err != nil {
+		return
+	}
+
+	err := c.CGroupClient.DeleteGroupV2(req.Name)
+	if err != nil {
+		log.Err(err).Msgf("Error while deleting cgroups controller.CreateCgroup()")
+		ctx.JSON(500, err)
+		return
+	}
+
+	ctx.JSON(200, "OK")
+}
+
 func (c *Controller) CreateCgroup(ctx *gin.Context) {
 	var cgroup CGroupV2CreationRequest
 

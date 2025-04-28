@@ -13,6 +13,7 @@ import (
 type CgroupInterface interface {
 	HandleCgroupResources(cpuQuota, memoryInByes int64, period uint64) cgroupsv2.Resources
 	CreateCgroupV2(res cgroupsv2.Resources, cgroupName string) error
+	DeleteGroupV2(cgroupName string) error
 	MovePIDToCgroupHandler(name string, pid string) error
 	GatherPostgresqlConnectionDetails(host, port, password, user, sslmode, query string) ([]map[string]interface{}, error)
 }
@@ -39,6 +40,17 @@ func (c *CgroupHandler) CreateCgroupV2(res cgroupsv2.Resources, cgroupName strin
 		return err
 	}
 	log.Info().Msgf("The group created successfully %s object is %s", cgroupName, cgroupManager)
+	return nil
+}
+
+func (c *CgroupHandler) DeleteGroupV2(cgroupName string) error {
+	err := os.RemoveAll(CGROUP_PATH + cgroupName) // Direct implementation in sdk
+	if err != nil {
+		log.Err(err).Msg("Error while deleting cgroup: in cGroupHandler CreateCgroupV2")
+		return err
+	}
+
+	log.Info().Msgf("The group deleted successfully %s", cgroupName)
 	return nil
 }
 
