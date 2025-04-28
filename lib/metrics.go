@@ -13,14 +13,6 @@ type CgroupCollector struct {
 	Desc *prometheus.Desc
 }
 
-type CgroupMetrics struct {
-	CPUUsageMicros     uint64 `json:"cpu_usage_micros"`
-	CPUThrottledMicros uint64 `json:"cpu_throttled_micros"`
-	MemoryCurrent      uint64 `json:"memory_current_bytes"`
-	OOMEvents          uint64 `json:"oom_events"`
-	ProcessesCurrent   uint64 `json:"processes_current"`
-}
-
 func (c *CgroupCollector) Describe(ch chan<- *prometheus.Desc) {
 	ch <- c.Desc
 }
