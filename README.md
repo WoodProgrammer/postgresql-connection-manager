@@ -13,6 +13,8 @@ This project allows system administrators to detect specific PostgreSQL queries,
 - Moves PostgreSQL backend PIDs into specified cgroups
 - Enables CPU and memory resource throttling
 - Provides an HTTP API for automation and control
+- AuthenticationMiddleWare enabled (v0.0.3)
+- Prometheus Metrics exposed (v0.0.4)
 
 ---
 
@@ -24,6 +26,7 @@ cd pg-connection-manager
 go build -o pg-cgroup-manager
 
 export PG_CONNECTION_HANDLER_PORT=9001
+export PG_CONNECTION_AUTH_TOKEN=enc_S1UP3RS3CR3T_4UTH_TOK3n
 ./pg-connection-manager
 
 ```
@@ -47,9 +50,8 @@ Basically you can gather PIDs by this endpoint and please specify your query to 
 ```sh
 curl http://localhost:8080/v1/get-pid-of-queries \
 --include \
---header "Content-Type: application/json"\
+--header "Authorization: Bearer: enc_S1UP3RS3CR3T_4UTH_TOK3n" \
 --request "GET" \
-
 --data '{"query": "SELECT pid, usename, application_name, state FROM pg_stat_activity;","port": "5432", "password":"CVVVVV", "username": "postgres", "sslmode": "disable"}'
 ```
 
@@ -92,7 +94,7 @@ To calcuate better values please check the documentation.
 ```sh
 curl http://localhost:8080/v1/create-cgroups \
     --include \
-    --header "Content-Type: application/json" \
+    --header "Authorization: Bearer: enc_S1UP3RS3CR3T_4UTH_TOK3n" \
     --request "POST" \
     --data '{"name": "pg-exporter-cgroup-second","period":1000, "cycle": 1000, "memory": 536870912}'
 ```
@@ -113,7 +115,7 @@ POST /v1/move-pid-to-cgroups
 ```sh
 curl http://localhost:8080/v1/move-pid-to-cgroups \
     --include \
-    --header "Content-Type: application/json" \
+    --header "Authorization: Bearer: enc_S1UP3RS3CR3T_4UTH_TOK3n" \
     --request "POST" \
     --data '{"pid": "7323","name": "pg-long-running-group"}'
 ```
