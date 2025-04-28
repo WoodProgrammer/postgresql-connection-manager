@@ -168,11 +168,7 @@ Ensure the API is protected in production environments (e.g., behind a firewall 
 <hr>
 
 ## 📌 Future Improvements
-
-
-* Include metrics endpoint for monitoring live cgroup stats
 * Add support for deleting or listing existing cgroups
-* Optional Prometheus integration
 
 <hr>
 
