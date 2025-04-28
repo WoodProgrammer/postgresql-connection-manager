@@ -4,7 +4,6 @@ import lib "github.com/WoodProgrammer/postgresql-connection-manager/lib"
 
 type Controller struct {
 	CGroupClient lib.CgroupInterface
-	MetricClient lib.MetricInterface
 }
 type Metrics struct {
 	CgroupName        string

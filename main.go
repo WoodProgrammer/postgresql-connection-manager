@@ -25,7 +25,7 @@ var CgroupV2Metrics = prometheus.NewGaugeVec(
 		Name: "cgroupv2_metrics",
 		Help: "Metrics collected from cgroupV2 filesystem",
 	},
-	[]string{"metric", "path"}, // Labels: metric name and path
+	[]string{"metric", "pg_cgroup_name"}, // Labels: metric name and path
 )
 
 func NewCgroupHandlerClient() lib.CgroupInterface {
@@ -65,7 +65,7 @@ func NewCgroupCollector() *lib.CgroupCollector {
 	return &lib.CgroupCollector{
 		Desc: prometheus.NewDesc("cgroupv2_metric",
 			"Cgroup v2 metrics",
-			[]string{"metric", "path"}, // labels
+			[]string{"metric", "pg_cgroup_name"},
 			nil,
 		),
 	}

@@ -13,10 +13,6 @@ type CgroupCollector struct {
 	Desc *prometheus.Desc
 }
 
-type MetricInterface interface {
-	Describe(ch chan<- *prometheus.Desc)
-}
-
 type CgroupMetrics struct {
 	CPUUsageMicros     uint64 `json:"cpu_usage_micros"`
 	CPUThrottledMicros uint64 `json:"cpu_throttled_micros"`
