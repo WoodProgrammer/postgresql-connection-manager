@@ -44,16 +44,9 @@ func (c *CgroupHandler) CreateCgroupV2(res cgroupsv2.Resources, cgroupName strin
 }
 
 func (c *CgroupHandler) DeleteGroupV2(cgroupName string) error {
-
-	cgroupLoadManager, err := cgroupsv2.Load(cgroupName)
+	err := os.RemoveAll(CGROUP_PATH + cgroupName) // Direct implementation in sdk
 	if err != nil {
 		log.Err(err).Msg("Error while deleting cgroup: in cGroupHandler CreateCgroupV2")
-		return err
-	}
-
-	err = cgroupLoadManager.Delete()
-	if err != nil {
-		log.Err(err).Msgf("Error while deleting cgroup: in cGroupHandler DeleteGroupV2 %s", cgroupName)
 		return err
 	}
 

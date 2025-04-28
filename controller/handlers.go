@@ -14,7 +14,7 @@ func (c *Controller) DeleteCgroupsPath(ctx *gin.Context) {
 
 	err := c.CGroupClient.DeleteGroupV2(req.Name)
 	if err != nil {
-		log.Err(err).Msgf("Error while creating cgroups controller.CreateCgroup()")
+		log.Err(err).Msgf("Error while deleting cgroups controller.CreateCgroup()")
 		ctx.JSON(500, err)
 		return
 	}
