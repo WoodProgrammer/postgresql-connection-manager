@@ -50,7 +50,7 @@ Basically you can gather PIDs by this endpoint and please specify your query to 
 ```sh
 curl http://localhost:8080/v1/get-pid-of-queries \
 --include \
---header "Authorization: Bearer: enc_S1UP3RS3CR3T_4UTH_TOK3n" \
+--header "Authorization: Bearer enc_S1UP3RS3CR3T_4UTH_TOK3n" \
 --request "GET" \
 --data '{"query": "SELECT pid, usename, application_name, state FROM pg_stat_activity;","port": "5432", "password":"CVVVVV", "username": "postgres", "sslmode": "disable"}'
 ```
@@ -94,9 +94,9 @@ To calcuate better values please check the documentation.
 ```sh
 curl http://localhost:8080/v1/create-cgroups \
     --include \
-    --header "Authorization: Bearer: enc_S1UP3RS3CR3T_4UTH_TOK3n" \
+    --header "Authorization: Bearer enc_S1UP3RS3CR3T_4UTH_TOK3n" \
     --request "POST" \
-    --data '{"name": "pg-exporter-cgroup-second","period":1000, "cycle": 1000, "memory": 536870912}'
+    --data '{"name": "pg-new-cgroup","period":1000, "cycle": 1000, "memory": 536870912}'
 ```
 
 It basically create cgroup please check the /sys/fs/cgroup directory then you receive 200 OK response
@@ -115,7 +115,7 @@ POST /v1/move-pid-to-cgroups
 ```sh
 curl http://localhost:8080/v1/move-pid-to-cgroups \
     --include \
-    --header "Authorization: Bearer: enc_S1UP3RS3CR3T_4UTH_TOK3n" \
+    --header "Authorization: Bearer enc_S1UP3RS3CR3T_4UTH_TOK3n" \
     --request "POST" \
     --data '{"pid": "7323","name": "pg-long-running-group"}'
 ```
@@ -125,6 +125,29 @@ Then you can basically check the cgroups.procs file of the given cgroup then you
 
 <hr>
 
+### Metrics
+
+For metrics you have to adjust your prometheus configs like this;
+
+```yaml
+scrape_configs:
+  - job_name: "pg_cgroup_manager"
+    metrics_path: "/v1/metrics"   # change if your exporter exposes metrics on a different path
+    scheme: "http"            # or "http" depending on your exporter
+    static_configs:
+      - targets:
+        - "localhost:8080"  # your exporter IP:port or domain
+
+    authorization:
+      type: Bearer
+      credentials: enc_S1UP3RS3CR3T_4UTH_TOK3n
+```
+
+## Dashboard
+
+This project also have very nice dashboard to show up Postgresql connections by groupsV2;
+
+<img src="./img/dashboard.png"></img>
 
 ## 🧪 Use Cases
 Isolate and throttle heavy or suspicious queries
