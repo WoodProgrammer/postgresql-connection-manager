@@ -7,6 +7,7 @@ import (
 
 	controller "github.com/WoodProgrammer/postgresql-connection-manager/controller"
 	lib "github.com/WoodProgrammer/postgresql-connection-manager/lib"
+	"github.com/prometheus/client_golang/prometheus"
 
 	"github.com/gin-gonic/gin"
 )
@@ -14,8 +15,17 @@ import (
 const (
 	CreateCgroupsPath    = "/v1/create-cgroups"
 	DeleteCgroupsPath    = "/v1/delete-cgroups"
+	Metrics              = "/v1/metrics"
 	MovePIDToCgroupsPath = "/v1/move-pid-to-cgroups"
 	GetPIDOfQueries      = "/v1/get-pid-of-queries"
+)
+
+var CgroupV2Metrics = prometheus.NewGaugeVec(
+	prometheus.GaugeOpts{
+		Name: "cgroupv2_metrics",
+		Help: "Metrics collected from cgroupV2 filesystem",
+	},
+	[]string{"metric", "pg_cgroup_name"}, // Labels: metric name and path
 )
 
 func NewCgroupHandlerClient() lib.CgroupInterface {
@@ -47,9 +57,24 @@ func AuthMiddleware() gin.HandlerFunc {
 		c.Next()
 	}
 }
+func init() {
+	prometheus.MustRegister(CgroupV2Metrics)
+}
+
+func NewCgroupCollector() *lib.CgroupCollector {
+	return &lib.CgroupCollector{
+		Desc: prometheus.NewDesc("cgroupv2_metric",
+			"Cgroup v2 metrics",
+			[]string{"metric", "pg_cgroup_name"},
+			nil,
+		),
+	}
+}
 
 func main() {
 	port := os.Getenv("PG_CONNECTION_HANDLER_PORT")
+	cgCollector := NewCgroupCollector()
+	prometheus.MustRegister(cgCollector)
 
 	if len(port) == 0 {
 		port = "8080"
@@ -60,6 +85,7 @@ func main() {
 	router.POST(MovePIDToCgroupsPath, AuthMiddleware(), controllerHandler.MovePIDToCgroup)
 	router.DELETE(DeleteCgroupsPath, AuthMiddleware(), controllerHandler.DeleteCgroupsPath)
 	router.GET(GetPIDOfQueries, AuthMiddleware(), controllerHandler.GetPIDOfQueries)
+	router.GET(Metrics, AuthMiddleware(), controllerHandler.PrometheusHandler())
 
 	router.Run(fmt.Sprintf("localhost:%s", port))
 }

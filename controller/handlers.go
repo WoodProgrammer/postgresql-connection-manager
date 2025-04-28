@@ -2,6 +2,7 @@ package controller
 
 import (
 	"github.com/gin-gonic/gin"
+	"github.com/prometheus/client_golang/prometheus/promhttp"
 	"github.com/rs/zerolog/log"
 )
 
@@ -68,4 +69,12 @@ func (c *Controller) GetPIDOfQueries(ctx *gin.Context) {
 	}
 
 	ctx.JSON(200, result)
+}
+
+func (c *Controller) PrometheusHandler() gin.HandlerFunc {
+	h := promhttp.Handler()
+
+	return func(c *gin.Context) {
+		h.ServeHTTP(c.Writer, c.Request)
+	}
 }
