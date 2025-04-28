@@ -21,6 +21,7 @@ func (c *Controller) DeleteCgroupsPath(ctx *gin.Context) {
 
 	ctx.JSON(200, "OK")
 }
+
 func (c *Controller) CreateCgroup(ctx *gin.Context) {
 	var cgroup CGroupV2CreationRequest
 
